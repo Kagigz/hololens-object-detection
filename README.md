@@ -2,6 +2,8 @@
 
 This sample shows how to perform Object Detection using the Microsoft Custom Vision API.
 
+![exampleResult](https://github.com/Kagigz/hololens-object-detection/blob/master/holo%20object%20detection.jpg)
+
 *In this example, the Custom Vision model is trained to recognize bananas and cans*
 
 ## How to use
