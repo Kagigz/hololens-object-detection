@@ -78,7 +78,6 @@ public class CustomVisionAnalyser : MonoBehaviour
             analysisRootObject = JsonConvert.DeserializeObject<AnalysisRootObject>(jsonResponse);
 
              SceneOrganiser.Instance.PlaceLabels(analysisRootObject);
-            //SceneOrganiser.Instance.PlaceLabels(analysisRootObject);
         }
     }
 

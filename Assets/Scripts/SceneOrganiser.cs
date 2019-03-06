@@ -26,16 +26,6 @@ public class SceneOrganiser : MonoBehaviour
     public GameObject probaLabel;
 
     /// <summary>
-    /// Reference to the last Label positioned
-    /// </summary>
-    internal Transform lastLabelPlaced;
-
-    /// <summary>
-    /// Reference to the last Label positioned
-    /// </summary>
-    internal TextMesh lastLabelPlacedText;
-
-    /// <summary>
     /// Current threshold accepted for displaying the label
     /// Reduce this value to display the recognition more often
     /// </summary>
@@ -69,47 +59,6 @@ public class SceneOrganiser : MonoBehaviour
         gameObject.AddComponent<CustomVisionObjects>();
     }
 
-    /// <summary>
-    /// Instantiate a Label in the appropriate location relative to the Main Camera.
-    /// </summary>
-    public void PlaceAnalysisLabel()
-    {
-
-        // LABEL FOR TAG
-        lastLabelPlaced = Instantiate(label.transform, cursor.transform.position, transform.rotation);
-        lastLabelPlacedText = lastLabelPlaced.GetComponent<TextMesh>();
-        lastLabelPlacedText.text = "";
-        lastLabelPlaced.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
-
-
-        // LABEL FOR PROBABILITY
-        lastLabelPlaced = Instantiate(label.transform, cursor.transform.position, transform.rotation);
-        lastLabelPlacedText = lastLabelPlaced.GetComponent<TextMesh>();
-        lastLabelPlacedText.text = "";
-        lastLabelPlaced.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
-
-        // Create a GameObject to which the texture can be applied
-        quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        quadRenderer = quad.GetComponent<Renderer>() as Renderer;
-        Material m = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
-        quadRenderer.material = m;
-
-        // Here you can set the transparency of the quad. Useful for debugging
-        float transparency = 0f;
-        quadRenderer.material.color = new Color(1, 1, 1, transparency);
-
-        // Set the position and scale of the quad depending on user position
-        quad.transform.parent = transform;
-        quad.transform.rotation = transform.rotation;
-
-        // The quad is positioned slightly forward in font of the user
-        quad.transform.localPosition = new Vector3(0.0f, 0.0f, 3.0f);
-
-        // The quad scale as been set with the following value following experimentation,  
-        // to allow the image on the quad to be as precisely imposed to the real world as possible
-        quad.transform.localScale = new Vector3(3f, 1.65f, 1f);
-        quad.transform.parent = null;
-    }
 
     public void StartAnalysisLabel()
     {
@@ -137,53 +86,6 @@ public class SceneOrganiser : MonoBehaviour
         quad.transform.parent = null;
     }
 
-    /// <summary>
-    /// Set the Tags as Text of the last label created. 
-    /// </summary>
-    public void FinaliseLabel(AnalysisRootObject analysisObject)
-    {
-        if (analysisObject.predictions != null)
-        {
-            // Sort the predictions to locate the highest one
-            List<Prediction> sortedPredictions = new List<Prediction>();
-            sortedPredictions = analysisObject.predictions.OrderBy(p => p.probability).ToList();
-            Prediction bestPrediction = new Prediction();
-            bestPrediction = sortedPredictions[sortedPredictions.Count - 1];
-
-
-
-            if (bestPrediction.probability > probabilityThreshold)
-            {
-                quadRenderer = quad.GetComponent<Renderer>() as Renderer;
-                Bounds quadBounds = quadRenderer.bounds;
-
-                // Position the label as close as possible to the Bounding Box of the prediction 
-                // At this point it will not consider depth
-                lastLabelPlaced.transform.parent = quad.transform;
-                lastLabelPlaced.transform.localPosition = CalculateBoundingBoxPosition(quadBounds, bestPrediction.boundingBox);
-
-                // Set the tag text
-                lastLabelPlacedText.text = bestPrediction.tagName;
-
-                // Cast a ray from the user's head to the currently placed label, it should hit the object detected by the Service.
-                // At that point it will reposition the label where the ray HL sensor collides with the object,
-                // (using the HL spatial tracking)
-                Debug.Log("Repositioning Label");
-                Vector3 headPosition = Camera.main.transform.position;
-                RaycastHit objHitInfo;
-                Vector3 objDirection = lastLabelPlaced.position;
-                if (Physics.Raycast(headPosition, objDirection, out objHitInfo, 30.0f, SpatialMapping.PhysicsRaycastMask))
-                {
-                    lastLabelPlaced.position = objHitInfo.point;
-                }
-            }
-        }
-        // Reset the color of the cursor
-        cursor.GetComponent<Renderer>().material.color = Color.green;
-
-        // Stop the analysis process
-        ImageCapture.Instance.ResetImageCapture();
-    }
 
     public void PlaceLabels(AnalysisRootObject analysisObject)
     {

@@ -105,7 +105,6 @@ public class ImageCapture : MonoBehaviour
     {
         // Create a label in world space using the ResultsLabel class 
         // Invisible at this point but correctly positioned where the image was taken
-        //SceneOrganiser.Instance.PlaceAnalysisLabel();
         SceneOrganiser.Instance.StartAnalysisLabel();
         Debug.Log("Execute Image Capture and Analysis");
         // Set the camera resolution to be the highest possible
